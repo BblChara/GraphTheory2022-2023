@@ -27,8 +27,10 @@ var mostProfitablePath = function (edges, bob, amount) {
   const tree = Array(edges.length + 1)
     .fill(null)
     .map((item) => []);
-  for (let [node1, node2] of edges) tree[node1].push(node2);
-  tree[node2].push(node1);
+  for (let [node1, node2] of edges) {
+    tree[node1].push(node2);
+    tree[node2].push(node1);
+  }
 
   // DFS с вычислением стоимости пути и сохранением максимума
   const DFS = (node, parent, step) => {
@@ -39,15 +41,18 @@ var mostProfitablePath = function (edges, bob, amount) {
       //родительской - иначе это конечные узел
       if (children == parent) continue;
       const [capacity, time] = DFS(children, node, step + 1);
-      bobsStep = Math.min(bobsStep, time + 1);
-      newScore = Math.max(newScore, capacity);
+      bobsStep = bobsStep < time + 1 ? bobsStep : time + 1;
+      newScore = newScore > capacity ? newScore : capacity;
     }
-    if (newScore == -1e10) newScore = 0;
+    newScore = newScore == -1e10 ? 0 : newScore;
     if (step < bobsStep) newScore += amount[node];
-    else if (time == bobsStep) newScore += amount[node] / 2;
+    else if (step == bobsStep) newScore += amount[node] / 2;
 
     return [newScore, bobsStep];
   };
 
   return DFS(0, -1, 0)[0];
 };
+console.log(
+  mostProfitablePath(testCases[0].edges, testCases[0].bob, testCases[0].amount)
+);
